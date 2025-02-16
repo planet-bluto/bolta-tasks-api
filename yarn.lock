@@ -217,6 +217,13 @@ body-parser@1.20.3:
     type-is "~1.6.18"
     unpipe "1.0.0"
 
+bolta-tasks-core@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/bolta-tasks-core/-/bolta-tasks-core-0.0.2.tgz#ff6791f6fd2797a56f783f46f039e6c35d6c4ace"
+  integrity sha512-hwFtmwOdEPyv3pYmg1LYM5Uv52H2hgk3lZ6Ta7ifZg1EWlqH5kiEIRBpkFnpqYv32YvZP2PIMRoD2iugOv1Sfw==
+  dependencies:
+    moment "^2.30.1"
+
 bytes@3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.2.tgz#8b0beeb98605adf1b128fa4386403c009e0221a5"
@@ -668,6 +675,11 @@ mime@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
+
+moment@^2.30.1:
+  version "2.30.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
+  integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
 
 ms@2.0.0:
   version "2.0.0"
