@@ -4,6 +4,7 @@ import { Interval } from "./interval";
 import { getDatabase } from "./databases";
 import { Document } from "@seald-io/nedb";
 import moment from 'moment';
+import { fireNotification } from "./notifications";
 
 // bro wrote nothing here
 SocketIO.on('connection', (socket) => {
@@ -37,16 +38,7 @@ export async function reminderCheck(thisTimestamp: number) {
     }
 
     SocketIO.emit("reminder_tasks", firedTasks);
-    SocketIO.emit("reminder_payload", payload);
-
-    let webhooks = (process.env?.WEBHOOKS ? process.env?.WEBHOOKS.split("|") : [])
-    webhooks.forEach((webhook: string) => {
-      print("sending reminder to webhook: ", webhook)
-      fetch(webhook, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      })
-    })
+    fireNotification(payload)
   } 
   return firedTasks
 }

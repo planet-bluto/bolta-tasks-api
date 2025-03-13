@@ -1,6 +1,7 @@
 import { FocusSession, FocusSessionStatic, UpdateType } from "bolta-tasks-core";
 import { getDatabase } from "./databases";
 import { Events } from "./events";
+import { fireNotification } from "./notifications";
 
 function wrapNumber(num: number, min: number, max: number) {
   const range = max - min + 1;
@@ -51,6 +52,10 @@ export class FocusTimer {
     this._hard_stop()
     this.intervals += 1
     Events.emit("update_timer", this.session._id)
+    fireNotification({
+      title: `Focus Timer for '${this.session.title}' Expired!`,
+      body: `Now on '${this.current_interval.label}'!`
+    })
   }
 
   back() {
