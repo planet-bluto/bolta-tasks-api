@@ -1,3 +1,4 @@
 .env
 /node_modules
 /db
+start_local_api.bat
