@@ -62,13 +62,14 @@ interval_1.Interval.on("minute", (thisTimestamp) => __awaiter(void 0, void 0, vo
         month: thisMoment.month(),
         year: thisMoment.year()
     };
+    print("Today: ", today);
     let alarms = {
         wake: (0, bolta_tasks_core_1.wakeTime)(tasks, today),
         sleep: (0, bolta_tasks_core_1.sleepTime)(tasks, today)
     };
     Object.keys(alarms).forEach((key) => {
         let this_time = alarms[key];
-        print(this_time);
+        print(`${key}: `, this_time, (0, moment_1.default)(this_time).format("M/D/YYYY h:mm A"));
         if (this_time != null) {
             let this_webhook = `${key.toUpperCase()}_WEBHOOKS`;
             let diff = thisMoment.millisecond(0).second(0).diff((0, moment_1.default)(this_time), "minute");
