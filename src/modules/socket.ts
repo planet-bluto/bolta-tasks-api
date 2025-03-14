@@ -1,5 +1,5 @@
 import { SocketIO } from "./server";
-import { CalendarDate, CalendarDate_fromDate, ClockTime, PlannerTask, PlannerTaskStatic, remindingTasks, Task, wakeTime } from 'bolta-tasks-core';
+import { CalendarDate, CalendarDate_fromDate, ClockTime, ClockTime_fromDate, PlannerTask, PlannerTaskStatic, remindingTasks, sleepTime, Task, wakeTime } from 'bolta-tasks-core';
 import { Interval } from "./interval";
 import { getDatabase } from "./databases";
 import { Document } from "@seald-io/nedb";
@@ -44,6 +44,7 @@ export async function reminderCheck(thisTimestamp: number) {
 }
 
 
+// Wake & Sleep Alarms
 Interval.on("minute", async (thisTimestamp: number) => {
   let db = await getDatabase("planner_tasks")
   let docs = await db.findAsync({})
@@ -56,20 +57,35 @@ Interval.on("minute", async (thisTimestamp: number) => {
     year: thisMoment.year()
   }
 
-  let wake_time = wakeTime(tasks, today)
-  print(wake_time)
-
-  let diff = thisMoment.millisecond(0).second(0).diff(moment(wake_time), "minute")
-  print(diff)
-
-  if (diff == -1) {
-    let webhooks = (process.env?.WAKE_WEBHOOKS ? process.env?.WAKE_WEBHOOKS.split("|") : [])
-    webhooks.forEach((webhook: string) => {
-      print("sending wake time to webhook: ", webhook)
-      fetch(webhook, {
-        method: "POST",
-        body: JSON.stringify(wake_time)
-      })
-    })
+  let alarms: any = {
+    wake: wakeTime(tasks, today),
+    sleep: sleepTime(tasks, today)
   }
+
+  Object.keys(alarms).forEach((key: string) => {
+    let this_time = alarms[key]
+    print(this_time)
+
+    if (this_time != null) {
+      let this_webhook = `${key.toUpperCase()}_WEBHOOKS`
+
+      let diff = thisMoment.millisecond(0).second(0).diff(moment(this_time), "minute")
+      print(diff)
+    
+      let this_time_json = ClockTime_fromDate(new Date(this_time))
+    
+      if (diff == -1) {
+        SocketIO.emit(`${key}_alarm`, this_time)
+  
+        let webhooks = (process.env[this_webhook] ? process.env[this_webhook].split("|") : [])
+        webhooks.forEach((webhook: string) => {
+          print(`sending ${key} time to webhook: `, webhook)
+          fetch(webhook, {
+            method: "POST",
+            body: JSON.stringify(this_time_json)
+          })
+        })
+      }
+    }
+  })
 })
