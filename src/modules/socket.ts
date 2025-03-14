@@ -57,6 +57,8 @@ Interval.on("minute", async (thisTimestamp: number) => {
     year: thisMoment.year()
   }
 
+  print("Today: ", today)
+
   let alarms: any = {
     wake: wakeTime(tasks, today),
     sleep: sleepTime(tasks, today)
@@ -64,7 +66,7 @@ Interval.on("minute", async (thisTimestamp: number) => {
 
   Object.keys(alarms).forEach((key: string) => {
     let this_time = alarms[key]
-    print(this_time)
+    print(`${key}: `, this_time, moment(this_time).format("M/D/YYYY h:mm A"))
 
     if (this_time != null) {
       let this_webhook = `${key.toUpperCase()}_WEBHOOKS`
