@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@seald-io/nedb": "^4.0.4",
-    "bolta-tasks-core": "0.0.6",
+    "bolta-tasks-core": "0.0.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "eventemitter3": "^5.0.1",
