@@ -51,8 +51,8 @@ function reminderCheck(thisTimestamp) {
         return firedTasks;
     });
 }
+// Wake & Sleep Alarms
 interval_1.Interval.on("minute", (thisTimestamp) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     let db = yield (0, databases_1.getDatabase)("planner_tasks");
     let docs = yield db.findAsync({});
     let tasks = docs.map(doc => new bolta_tasks_core_1.PlannerTask(doc));
@@ -62,18 +62,29 @@ interval_1.Interval.on("minute", (thisTimestamp) => __awaiter(void 0, void 0, vo
         month: thisMoment.month(),
         year: thisMoment.year()
     };
-    let wake_time = (0, bolta_tasks_core_1.wakeTime)(tasks, today);
-    print(wake_time);
-    let diff = thisMoment.millisecond(0).second(0).diff((0, moment_1.default)(wake_time), "minute");
-    print(diff);
-    if (diff == -1) {
-        let webhooks = (((_a = process.env) === null || _a === void 0 ? void 0 : _a.WAKE_WEBHOOKS) ? (_b = process.env) === null || _b === void 0 ? void 0 : _b.WAKE_WEBHOOKS.split("|") : []);
-        webhooks.forEach((webhook) => {
-            print("sending wake time to webhook: ", webhook);
-            fetch(webhook, {
-                method: "POST",
-                body: JSON.stringify(wake_time)
-            });
-        });
-    }
+    let alarms = {
+        wake: (0, bolta_tasks_core_1.wakeTime)(tasks, today),
+        sleep: (0, bolta_tasks_core_1.sleepTime)(tasks, today)
+    };
+    Object.keys(alarms).forEach((key) => {
+        let this_time = alarms[key];
+        print(this_time);
+        if (this_time != null) {
+            let this_webhook = `${key.toUpperCase()}_WEBHOOKS`;
+            let diff = thisMoment.millisecond(0).second(0).diff((0, moment_1.default)(this_time), "minute");
+            print(diff);
+            let this_time_json = (0, bolta_tasks_core_1.ClockTime_fromDate)(new Date(this_time));
+            if (diff == -1) {
+                server_1.SocketIO.emit(`${key}_alarm`, this_time);
+                let webhooks = (process.env[this_webhook] ? process.env[this_webhook].split("|") : []);
+                webhooks.forEach((webhook) => {
+                    print(`sending ${key} time to webhook: `, webhook);
+                    fetch(webhook, {
+                        method: "POST",
+                        body: JSON.stringify(this_time_json)
+                    });
+                });
+            }
+        }
+    });
 }));
