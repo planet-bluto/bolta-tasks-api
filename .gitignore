@@ -3,3 +3,4 @@
 /db
 start_local_api.bat
 _db/
+yarn.lock
