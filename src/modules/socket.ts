@@ -1,7 +1,7 @@
 import { SocketIO } from "./server";
 import { CalendarDate, CalendarDate_fromDate, ClockTime, ClockTime_fromDate, PlannerTask, PlannerTaskStatic, remindingTasks, sleepTime, Task, wakeTime } from 'bolta-tasks-core';
 import { Interval } from "./interval";
-import { getDatabase } from "./databases";
+import { _cache_update, getDatabase } from "./databases";
 import { Document } from "@seald-io/nedb";
 import moment from 'moment';
 import { fireNotification } from "./notifications";
@@ -56,16 +56,39 @@ Interval.on("minute", async (thisTimestamp: number) => {
     month: thisMoment.month(),
     year: thisMoment.year()
   }
+  let tomorrowMoment = moment(thisTimestamp).add(1, "days")
+  let tomorrow: CalendarDate = {
+    day: tomorrowMoment.date(),
+    month: tomorrowMoment.month(),
+    year: tomorrowMoment.year()
+  }
+  let yesterdayMoment = moment(thisTimestamp).subtract(1, "days")
+  let yesterday: CalendarDate = {
+    day: yesterdayMoment.date(),
+    month: yesterdayMoment.month(),
+    year: yesterdayMoment.year()
+  }
+  let daybeforeMoment = moment(thisTimestamp).subtract(2, "days")
+  let daybefore: CalendarDate = {
+    day: daybeforeMoment.date(),
+    month: daybeforeMoment.month(),
+    year: daybeforeMoment.year()
+  }
 
   print("Today: ", today)
 
-  let alarms: any = {
-    wake: wakeTime(tasks, today),
-    sleep: sleepTime(tasks, today)
-  }
+  let alarms: any = [
+    ["wake", wakeTime(tasks, today)],
+    ["sleep", sleepTime(tasks, today)],
+    ["sleep", sleepTime(tasks, tomorrow)],
+    ["sleep", sleepTime(tasks, yesterday)],
+    ["sleep", sleepTime(tasks, daybefore)],
+  ]
 
-  Object.keys(alarms).forEach((key: string) => {
-    let this_time = alarms[key]
+  alarms.forEach((entry: any) => {
+    let key = entry[0]
+    let this_time = entry[1]
+
     print(`${key}: `, this_time, moment(this_time).format("M/D/YYYY h:mm A"))
 
     if (this_time != null) {
@@ -91,3 +114,9 @@ Interval.on("minute", async (thisTimestamp: number) => {
     }
   })
 })
+
+if (process.env["BOLTA_DEBUG"] == "true") {
+  _cache_update("schedules").then(() => {
+    Interval.emit("minute")
+  })
+}

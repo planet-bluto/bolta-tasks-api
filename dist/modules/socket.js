@@ -62,13 +62,35 @@ interval_1.Interval.on("minute", (thisTimestamp) => __awaiter(void 0, void 0, vo
         month: thisMoment.month(),
         year: thisMoment.year()
     };
-    print("Today: ", today);
-    let alarms = {
-        wake: (0, bolta_tasks_core_1.wakeTime)(tasks, today),
-        sleep: (0, bolta_tasks_core_1.sleepTime)(tasks, today)
+    let tomorrowMoment = (0, moment_1.default)(thisTimestamp).add(1, "days");
+    let tomorrow = {
+        day: tomorrowMoment.date(),
+        month: tomorrowMoment.month(),
+        year: tomorrowMoment.year()
     };
-    Object.keys(alarms).forEach((key) => {
-        let this_time = alarms[key];
+    let yesterdayMoment = (0, moment_1.default)(thisTimestamp).subtract(1, "days");
+    let yesterday = {
+        day: yesterdayMoment.date(),
+        month: yesterdayMoment.month(),
+        year: yesterdayMoment.year()
+    };
+    let daybeforeMoment = (0, moment_1.default)(thisTimestamp).subtract(2, "days");
+    let daybefore = {
+        day: daybeforeMoment.date(),
+        month: daybeforeMoment.month(),
+        year: daybeforeMoment.year()
+    };
+    print("Today: ", today);
+    let alarms = [
+        ["wake", (0, bolta_tasks_core_1.wakeTime)(tasks, today)],
+        ["sleep", (0, bolta_tasks_core_1.sleepTime)(tasks, today)],
+        ["sleep", (0, bolta_tasks_core_1.sleepTime)(tasks, tomorrow)],
+        ["sleep", (0, bolta_tasks_core_1.sleepTime)(tasks, yesterday)],
+        ["sleep", (0, bolta_tasks_core_1.sleepTime)(tasks, daybefore)],
+    ];
+    alarms.forEach((entry) => {
+        let key = entry[0];
+        let this_time = entry[1];
         print(`${key}: `, this_time, (0, moment_1.default)(this_time).format("M/D/YYYY h:mm A"));
         if (this_time != null) {
             let this_webhook = `${key.toUpperCase()}_WEBHOOKS`;
@@ -89,3 +111,8 @@ interval_1.Interval.on("minute", (thisTimestamp) => __awaiter(void 0, void 0, vo
         }
     });
 }));
+if (process.env["BOLTA_DEBUG"] == "true") {
+    (0, databases_1._cache_update)("schedules").then(() => {
+        interval_1.Interval.emit("minute");
+    });
+}

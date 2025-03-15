@@ -6,4 +6,5 @@ require("./extends/array");
 require("./arrayLib.js");
 // Modules
 require("./modules/server");
+require("./modules/interface");
 print("FUCK YOU (x2)");

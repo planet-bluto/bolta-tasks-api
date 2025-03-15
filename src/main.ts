@@ -6,5 +6,6 @@ import "./arrayLib.js"
 
 // Modules
 import "./modules/server"
+import "./modules/interface"
 
 print("FUCK YOU (x2)")
