@@ -163,7 +163,7 @@ app.get("/focus_timers/:id", asyncHandler( async (req, res) => {
   props.forEach(prop => {
     if (prop == "session") {
       static_timer["session_id"] = timer[prop]._id
-    } else if (!["_timeout"].includes(prop)) {
+    } else if (!["_timeouts"].includes(prop)) {
       static_timer[prop] = timer[prop]
     }
   })
@@ -176,15 +176,21 @@ app.get("/focus_timers/:id", asyncHandler( async (req, res) => {
 }))
 
 app.patch("/focus_timers/:id/call/:method", asyncHandler( async (req, res) => {
-  let timer = TIMERS[req.params.id]
-  let method: keyof FocusTimer = (req.params.method as keyof FocusTimer)
-  let args: any[] = (Array.isArray(req.body.args) ? req.body.args : [])
+  let timer = TIMERS[req.params.id];
+  let method: keyof FocusTimer = req.params.method as keyof FocusTimer;
+  let args: any[] = Array.isArray(req.body.args) ? req.body.args : [];
 
   if (timer != undefined) {
-    let result = timer[method](...args)
-    Events.emit("update_timer", req.params.id)
-    res.send(result)
+    // print(timer);
+    if (typeof timer[method] === 'function') {
+        let result = (timer[method] as Function)(...args);
+        Events.emit("update_timer", req.params.id);
+        // print("timer update: ", result)
+        res.send(result);
+    } else {
+        res.status(400).send({ error: "Method not callable" });
+    }
   } else {
-    res.send()
+    res.send();
   }
 }))

@@ -2,6 +2,7 @@ import { FocusSession, FocusSessionStatic, UpdateType } from "bolta-tasks-core";
 import { getDatabase } from "./databases";
 import { Events } from "./events";
 import { fireNotification } from "./notifications";
+import { SocketIO } from "./server";
 
 function wrapNumber(num: number, min: number, max: number) {
   const range = max - min + 1;
@@ -15,7 +16,7 @@ export class FocusTimer {
 
   _elapsed: number = 0;
   _start_time: number = 0;
-  _timeout: any | null = null;
+  _timeouts: any[] = [];
 
   constructor(session: FocusSession) {
     // super()
@@ -43,6 +44,14 @@ export class FocusTimer {
     return Math.max(_raw, 0)
   }
 
+  _clearAllTimeouts() {
+    this._timeouts.forEach(timeout => {
+      clearTimeout(timeout)
+    })
+    
+    this._timeouts = []
+  }
+
   _hard_stop() {
     this._elapsed = 0
     this.reset()
@@ -54,8 +63,19 @@ export class FocusTimer {
     Events.emit("update_timer", this.session._id)
     fireNotification({
       title: `Focus Timer for '${this.session.title}' Expired!`,
-      body: `Now on '${this.current_interval.label}'!`
+      body: `Now on '${this.current_interval.label}'!`,
+      sfx: `focus_timer_${["active", "break"][this.current_interval.type]}`
     })
+  }
+
+  _countdown(num: number) {
+    SocketIO.emit("timer_countdown", this.session._id, num)
+    if (num == 10) {
+      fireNotification({
+        title: `10 Second Warning for '${this.session.title}' Focus Timer`,
+        body: `Get to a good stopping point`
+      })
+    }
   }
 
   back() {
@@ -82,9 +102,22 @@ export class FocusTimer {
 
     this.running = true
     this._start_time = Date.now()
-    this._timeout = setTimeout(() => {
+    this._timeouts.push(setTimeout(() => {
       this._expired()
-    }, this.current_interval.duration - (this._elapsed))
+    }, this.current_interval.duration - (this._elapsed)))
+
+    const COUNTDOWN_AMOUNT = 10
+
+    for (let index = 0; index < (COUNTDOWN_AMOUNT + 1); index++) {
+      let num = COUNTDOWN_AMOUNT - index
+      let wait_time = (this.current_interval.duration - ((num * 1000) + 1000)) - (this._elapsed)
+      // print(wait_time)
+      if (wait_time >= 0) {
+        this._timeouts.push(setTimeout(() => {
+          this._countdown(num)
+        }, wait_time))
+      }
+    }
   }
 
   pause() {
@@ -92,19 +125,19 @@ export class FocusTimer {
 
     this.running = false
     this._elapsed += Date.now() - this._start_time
-    clearTimeout(this._timeout)
+    this._clearAllTimeouts()
   }
 
   reset() {
     this.running = false
     this._elapsed = 0
-    clearTimeout(this._timeout)
+    this._clearAllTimeouts()
   }
 
   seek(ms: number) {
     if (this.running) {
       this.running = false
-      clearTimeout(this._timeout)
+      this._clearAllTimeouts()
     }
     
     this._elapsed = ms

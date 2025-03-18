@@ -75,7 +75,7 @@ Interval.on("minute", async (thisTimestamp: number) => {
     year: daybeforeMoment.year()
   }
 
-  print("Today: ", today)
+  // print("Today: ", today)
 
   let alarms: any = [
     ["wake", wakeTime(tasks, today)],
