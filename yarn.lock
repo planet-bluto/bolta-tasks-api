@@ -217,10 +217,10 @@ body-parser@1.20.3:
     type-is "~1.6.18"
     unpipe "1.0.0"
 
-bolta-tasks-core@0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/bolta-tasks-core/-/bolta-tasks-core-0.0.8.tgz#ad44e3ccaef2431e5f049bd74b68c6eafb22f57b"
-  integrity sha512-cpOvUY9uVp0ol/HKgpeZDPSnd/IKtHCRmSQFgo64RW7yl/065uAehneHHpZ6BO5RpExXNaLbOtzcouyhLfhm7A==
+bolta-tasks-core@0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/bolta-tasks-core/-/bolta-tasks-core-0.0.9.tgz#433de43b7ca0dfc1b84d96e301695085bbc7c685"
+  integrity sha512-8RWty485ccYH8AQYBrlQ69LujlKm0Pmuvv3+xgOw5c6AI2sywwBrlDMea2SjXksQ/UrOscL7olXtSaedBL5diQ==
   dependencies:
     moment "^2.30.1"
 
